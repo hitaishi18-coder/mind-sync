@@ -1,0 +1,12 @@
+@import "tailwindcss";
+/* FILE: index.css or globals.css
+   This ensures HTML, body, and the root element are full height.
+*/
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  /* Hides any potential horizontal scrollbar from viewport units */
+  overflow-x: hidden; 
+}
