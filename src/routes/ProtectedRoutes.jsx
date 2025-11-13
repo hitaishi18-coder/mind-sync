@@ -1,44 +1,41 @@
 import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
-import { SpinnerButton } from "../components/Spinner";
+import { SpinnerButton } from "../components/SpinnerButton";
+
+
 
 function ProtectedRoute({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 🧠 Check if the user is logged in (has a session)
     const checkLogin = async () => {
+      setLoading(true);
       const { data } = await supabase.auth.getSession();
 
-      if (data.session) {
-        setIsLoggedIn(true);
-      } else {
-        setIsLoggedIn(false);
-      }
+      // Fake delay to visualize the spinner (remove later)
+      await new Promise((res) => setTimeout(res, 2000));
 
+      setIsLoggedIn(!!data.session);
       setLoading(false);
     };
 
     checkLogin();
   }, []);
 
-  // ⏳ Show spinner while checking
   if (loading) {
     return (
-      <p style={{ textAlign: "center" }}>
-        <SpinnerButton />
-      </p>
+      <div className="flex flex-col justify-center items-center h-screen gap-3">
+        <SpinnerButton/>
+      </div>
     );
   }
 
-  //  Redirect to login if not logged in
   if (!isLoggedIn) {
     return <Navigate to="/login" replace />;
   }
 
-  // Otherwise, show the protected content (children)
   return children;
 }
 
