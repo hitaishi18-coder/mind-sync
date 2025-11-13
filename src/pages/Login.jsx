@@ -55,7 +55,7 @@ function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="focus:ring-2 focus:ring-indigo-400"
+              className="focus:ring-2 focus:ring-blue-500"
             />
             <Input
               type="password"
@@ -63,11 +63,11 @@ function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="focus:ring-2 focus:ring-indigo-400"
+              className="focus:ring-2 focus:ring-blue-500"
             />
             <Button
               type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold"
+              className="w-full bg-blue-500 hover:bg-blue-300  text-white font-semibold"
               disabled={loading}
             >
               {loading ? "Logging in..." : "Log In"}
@@ -78,7 +78,7 @@ function Login() {
           </form>
           <p className="text-sm text-center mt-4 text-gray-600">
             Don’t have an account?{" "}
-            <a href="/signup" className="text-indigo-600 hover:underline">
+            <a href="/signup" className="text-blue-500 hover:underline">
               Sign up
             </a>
           </p>

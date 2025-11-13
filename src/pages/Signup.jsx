@@ -56,11 +56,11 @@ function Signup() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="focus:ring-2 focus:ring-indigo-400"
+              className="focus:ring-2 focus:ring-blue-500"
             />
             <Button
               type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold"
+              className="w-full bg-blue-500 hover:bg-blue-300  text-white font-semibold"
               disabled={loading}
             >
               {loading ? "Signing up..." : "Sign Up"}
@@ -71,7 +71,7 @@ function Signup() {
           </form>
           <p className="text-sm text-center mt-4 text-gray-600">
             Already have an account?{" "}
-            <a href="/login" className="text-indigo-600 hover:underline">
+            <a href="/login" className="text-blue-500 hover:underline">
               Log in
             </a>
           </p>

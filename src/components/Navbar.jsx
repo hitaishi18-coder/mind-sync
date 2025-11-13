@@ -16,18 +16,18 @@ export default function Navbar() {
     <nav className="w-full bg-white/70 backdrop-blur-md border-b border-gray-200 shadow-sm fixed top-0 left-0 z-50">
       <div className="max-w-6xl mx-auto flex justify-between items-center px-6 py-3">
         {/* Logo */}
-        <h1 className="text-2xl font-extrabold text-indigo-600">MindSync</h1>
+        <h1 className="text-2xl font-extrabold text-blue-500">MindSync</h1>
 
         {/* Desktop Links */}
 
         <div className="hidden md:flex items-center gap-6 text-gray-700 font-medium">
-  <a href="/" className="hover:text-indigo-600 transition">
+  <a href="/" className="hover:text-blue-500 transition">
     Home
   </a>
-  <a href="/about" className="hover:text-indigo-600 transition">
+  <a href="/about" className="hover:text-blue-500 transition">
     About
   </a>
-  <a href="/contact" className="hover:text-indigo-600 transition">
+  <a href="/contact" className="hover:text-blue-500 transition">
     Contact
   </a>
   <Separator orientation="vertical" className="h-6 bg-gray-300" />
@@ -35,12 +35,12 @@ export default function Navbar() {
   <ThemeToggle />  
 
   <a href="/login">
-    <Button variant="outline" className="hover:bg-indigo-600 hover:text-white">
+    <Button variant="outline" className="hover:bg-blue-500 hover:text-white">
       Login
     </Button>
   </a>
   <a href="/signup">
-    <Button className="bg-indigo-600 text-white hover:bg-indigo-700">
+    <Button className="bg-blue-500 text-white hover:bg-blue-500">
       Sign Up
     </Button>
   </a>
@@ -58,28 +58,28 @@ export default function Navbar() {
             </SheetTrigger>
             <SheetContent side="right" className="bg-white/95 backdrop-blur-md">
               <SheetHeader>
-                <SheetTitle className="text-indigo-600 text-2xl font-extrabold">
+                <SheetTitle className="text-blue-500 text-2xl font-extrabold">
                   MindSync
                 </SheetTitle>
               </SheetHeader>
               <div className="flex flex-col mt-6 gap-4 text-gray-700 font-medium">
-                <a href="/" className="hover:text-indigo-600 transition">
+                <a href="/" className="hover:text-blue-500 transition">
                   Home
                 </a>
-                <a href="/about" className="hover:text-indigo-600 transition">
+                <a href="/about" className="hover:text-blue-500 transition">
                   About
                 </a>
-                <a href="/contact" className="hover:text-indigo-600 transition">
+                <a href="/contact" className="hover:text-blue-500 transition">
                   Contact
                 </a>
                 <Separator className="my-2" />
                 <a href="/login">
-                  <Button variant="outline" className="w-full hover:bg-indigo-600 hover:text-white">
+                  <Button variant="outline" className="w-full hover:bg-blue-500 hover:text-white">
                     Login
                   </Button>
                 </a>
                 <a href="/signup">
-                  <Button className="w-full bg-indigo-600 text-white hover:bg-indigo-700">
+                  <Button className="w-full bg-blue-500 text-white hover:bg-blue-500">
                     Sign Up
                   </Button>
                 </a>
