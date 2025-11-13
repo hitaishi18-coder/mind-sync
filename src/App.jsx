@@ -14,7 +14,7 @@ function App() {
 
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
         <Routes>
-          <Route path="/" element={<h1 className="text-2xl font-bold text-gray-700">Welcome to MindSync 🚀</h1>} />
+          <Route path="/" element={<h1 className="text-2xl font-bold text-gray-700">Welcome to MindSync </h1>} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
 
