@@ -1,231 +1,232 @@
-🧠 MindSync
-AI-Powered Neuro-Productivity & Cognitive State Tracker
+
+# 🧠 MindSync
+
+## AI-Powered Neuro-Productivity & Cognitive State Tracker
 
 MindSync is a next-generation, intelligent productivity dashboard that goes beyond traditional time-tracking tools.
-Instead of only measuring how long you work, MindSync focuses on how you feel while working.
+Instead of only measuring **how long** you work, MindSync focuses on **how you feel while working**.
 
-By combining real-time computer vision, sentiment analysis, and interactive 3D visualization, MindSync dynamically adapts to a user’s mental and emotional state, enabling a deeper understanding of focus, stress, fatigue, and engagement.
+By combining **real-time computer vision**, **sentiment analysis**, and **interactive 3D visualization**, MindSync dynamically adapts to a user’s mental and emotional state — enabling a deeper understanding of **focus, stress, fatigue, and engagement**.
 
-The core idea: Productivity is not linear — it is cognitive.
+> **Core Idea:** Productivity is not linear — it is cognitive.
 
-📌 Project Vision & Problem Statement
+---
 
-Traditional productivity tools:
+## 📌 Project Vision & Problem Statement
 
-Track hours
+Traditional productivity tools typically:
 
-Track tasks
+* Track hours
+* Track tasks
+* Track clicks
 
-Track clicks
+But they **do not track the human behind the screen**.
 
-But they do not track the human behind the screen.
+### MindSync solves this by:
 
-MindSync addresses this gap by:
+* Continuously analyzing **facial expressions**
+* Interpreting **emotional tone** in speech and text
+* Reacting **visually and behaviorally** to mental fatigue and distraction
 
-Continuously analyzing facial expressions
+This transforms productivity from a **static metric** into a **living, adaptive system**.
 
-Interpreting emotional tone in speech and text
+---
 
-Reacting visually and behaviorally to mental fatigue and distraction
+## 🚀 Core Features
 
-This transforms productivity from a static metric into a living, adaptive system.
+### 👁️ Real-Time Biometric Emotion Analysis
 
-🚀 Core Features (Detailed Breakdown)
-👁️ Real-Time Biometric Emotion Analysis
+* Uses the device **webcam** to capture live video frames
+* Runs **on-device AI inference** (no backend/server dependency)
+* Classifies emotional states:
 
-Uses the device webcam to capture live video frames.
+  * Neutral
+  * Happy
+  * Sad
+  * Angry
+  * Fearful
+  * Disgusted
+  * Surprised
 
-Runs on-device AI inference (no server dependency).
+These raw emotions are further mapped into **productivity-relevant states**:
 
-Classifies emotional states such as:
+* Focused
+* Stressed
+* Tired
 
-Neutral
+The system updates the user’s cognitive state **every few seconds**, ensuring responsiveness without overloading the browser.
 
-Happy
+---
 
-Sad
+### 🔮 3D Neuro-Core Visualization (Digital Brain)
 
-Angry
-
-Fearful
-
-Disgusted
-
-Surprised
-
-These raw emotions are further interpreted into productivity-relevant states like:
-
-Focused
-
-Stressed
-
-Tired
-
-The system updates the user’s cognitive state every few seconds, ensuring responsiveness without overloading the browser.
-
-🔮 3D Neuro-Core Visualization (Digital Brain)
-
-A dynamic 3D sphere representing the user’s mental state.
-
-Built using Three.js with React-Three-Fiber.
+* A dynamic **3D sphere** representing the user’s mental state
+* Built using **Three.js** with **React-Three-Fiber**
 
 The sphere:
 
-Changes color based on emotional intensity
+* Changes **color** based on emotional intensity
+* Morphs and distorts based on **cognitive load**
 
-Morphs and distorts based on cognitive load
+Behavior:
 
-When stress increases, the sphere becomes unstable and vibrant.
+* Increased stress → unstable, vibrant distortion
+* Deep focus → stable, calm visuals
 
-During focus, it stabilizes and emits calm, steady visuals.
+This creates a **real-time visual feedback loop** between emotion and awareness.
 
-This creates a visual feedback loop between emotion and awareness.
+---
 
-🗣️ Voice-Activated AI Journal with Sentiment Analysis
+### 🗣️ Voice-Activated AI Journal with Sentiment Analysis
 
-Users can speak directly to the application.
+* Users can speak directly to the application
+* Voice input is converted to text using the **Web Speech API**
+* Text is analyzed using **Natural Language Processing (NLP)**
 
-Voice input is converted to text using the Web Speech API.
+The sentiment engine assigns a **valence score**:
 
-The text is then analyzed using Natural Language Processing (NLP).
+* Positive sentiment
+* Negative sentiment
 
-The sentiment engine assigns a valence score:
+This analysis is **context-aware**, not keyword-based.
 
-Positive sentiment
+**Examples:**
 
-Negative sentiment
+* `"I am not bad today"` → Positive
+* `"I feel devastated"` → Strongly negative
 
-This analysis is contextual, not keyword-based.
+This allows the system to understand **emotional nuance**, not just vocabulary.
 
-Example:
+---
 
-“I am not bad today” → Positive
+### 🎵 Adaptive Soundscapes
 
-“I feel devastated” → Strongly negative
+* Background audio is **automatically controlled**
+* When focus drops:
 
-This allows the system to understand emotional nuance, not just vocabulary.
+  * Flow-state / ambient music is triggered
+* When deep focus is detected:
 
-🎵 Adaptive Soundscapes
+  * Audio is muted automatically
 
-Background audio is dynamically controlled.
+This minimizes **manual interaction** and prevents audio fatigue.
 
-When focus levels drop:
+---
 
-Flow-state or ambient music is triggered.
-
-When deep focus is detected:
-
-Audio is muted automatically.
-
-This minimizes manual interaction and prevents audio fatigue.
-
-⚡ Distraction Zapper
+### ⚡ Distraction Zapper
 
 Detects:
 
-Prolonged inattentiveness
+* Prolonged inattentiveness
+* Sudden emotional drops
+* Idle or disengaged states
 
-Sudden emotional drops
+Instead of harsh alerts, it sends **intelligent nudges** designed to restore awareness **without breaking flow**.
 
-Idle or disengaged states
+---
 
-Sends intelligent nudges instead of aggressive notifications.
+## 🛠️ Technology Stack
 
-Designed to bring awareness without breaking flow.
+| Category           | Technology                   | Role                                 |
+| ------------------ | ---------------------------- | ------------------------------------ |
+| Frontend Framework | React + Vite                 | Core SPA architecture                |
+| Computer Vision    | `@vladmandic/face-api`       | Face detection & emotion recognition |
+| 3D Rendering       | Three.js + React-Three-Fiber | Neuro-core visualization             |
+| NLP                | `sentiment`                  | Text & voice sentiment analysis      |
+| Speech Recognition | Web Speech API               | Voice-to-text                        |
+| UI System          | Tailwind CSS v4 + ShadCN UI  | Glassmorphism UI                     |
+| Data Visualization | Recharts                     | Real-time emotion graphs             |
+| State Management   | React Hooks + LocalStorage   | Persistent state                     |
 
-🛠️ Technology Stack (Expanded Explanation)
-Category	Technology	Role in Application
-Frontend Framework	React + Vite	Core SPA architecture and fast development environment
-Computer Vision	@vladmandic/face-api	Face detection and emotion classification
-3D Rendering	Three.js + React-Three-Fiber	Interactive neuro-core visualization
-NLP	sentiment library	Text and voice sentiment scoring
-Speech Recognition	Web Speech API	Voice-to-text conversion
-UI System	Tailwind CSS v4 + ShadCN UI	Glassmorphism UI, components, and responsiveness
-Data Visualization	Recharts	Real-time emotional trend graphs
-State Management	React Hooks + LocalStorage	Persistent client-side state
-⚡ Installation & Local Setup
+---
 
-Clone the repository
+## ⚡ Installation & Local Setup
 
+### 1️⃣ Clone the repository
+
+```bash
 git clone https://github.com/your-username/mind-sync.git
+```
 
+### 2️⃣ Install dependencies
 
-Install dependencies
-
+```bash
 pnpm install
+```
 
+### 3️⃣ Run the development server
 
-Run development server
-
+```bash
 pnpm run dev
+```
 
-🧠 Design Decision: Why face-api.js Instead of MediaPipe or Raw TensorFlow.js
-Comparison with Raw TensorFlow.js
+---
 
-TensorFlow.js is low-level.
+## 🧠 Design Decision: Why face-api.js?
 
-Requires:
+### ❌ Raw TensorFlow.js
 
-Manual tensor lifecycle management (tf.tidy)
+* Low-level API
+* Requires:
 
-Custom post-processing
+  * Manual tensor lifecycle management (`tf.tidy`)
+  * Custom post-processing
+  * Large generic models
+* High development overhead for browser apps
 
-Large generic models
+### ✅ face-api.js (Chosen)
 
-Development overhead is high for browser-based apps.
+* Built **on top of TensorFlow.js**
+* Provides optimized, pre-trained models for:
 
-MindSync Advantage
+  * Face detection
+  * Emotion recognition
+* Faster development with minimal boilerplate
 
-face-api.js is built on top of TensorFlow.js.
+---
 
-Provides optimized, pre-trained models specifically for:
+### ❌ MediaPipe
 
-Face detection
+* Extremely powerful but:
 
-Expression recognition
+  * Heavy due to WebAssembly (WASM)
+  * Designed for 468-point facial geometry
+* Overkill for emotion-only detection
 
-Enables faster iteration with less boilerplate code.
+### ✅ MindSync Approach
 
-Comparison with MediaPipe
+* Uses **Tiny Face Detector (~200KB)**
+* Runs efficiently on **CPU or WebGL**
+* Keeps dashboard smooth and responsive
 
-MediaPipe is extremely powerful but:
+---
 
-Heavy due to WebAssembly (WASM)
+## 🧬 How Biometric Emotion Detection Works
 
-Designed for advanced geometry (468-point face mesh)
+### Conceptual Overview
 
-Overkill for emotion-only classification.
+* Emotion detection is a **classification problem**
+* Each video frame is passed through a **CNN**
+* The model outputs probabilities (0–1) for 7 emotions
+* The highest probability emotion is selected
 
-MindSync Advantage
+---
 
-Uses Tiny Face Detector (~200KB).
+### 1️⃣ Model Loading
 
-Runs efficiently on CPU or WebGL.
-
-Ensures the dashboard stays smooth and responsive.
-
-🧬 How Biometric Emotion Detection Works (Technical Flow)
-Conceptual Overview
-
-Emotion detection is a classification problem.
-
-Each video frame is passed through a CNN.
-
-The model outputs probabilities (0–1) for 7 emotions.
-
-The emotion with the highest probability is selected.
-
-Step-by-Step Execution
-1️⃣ Model Loading
+```js
 await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
 await faceapi.nets.faceExpressionNet.loadFromUri('/models');
+```
 
+* Pre-trained weights are loaded
+* No model training occurs in the browser
 
-Pre-trained weights are loaded.
+---
 
-No training occurs in the browser.
+### 2️⃣ Continuous Inference Loop
 
-2️⃣ Continuous Inference Loop
+```js
 setInterval(async () => {
   const video = webcamRef.current.video;
 
@@ -241,72 +242,75 @@ setInterval(async () => {
     setMood(maxEmotion);
   }
 }, 2000);
+```
 
+**Internally:**
 
-What’s happening internally:
+* Webcam frame is captured
+* CNN performs inference via WebGL
+* Emotion probabilities are returned
+* React state updates trigger UI changes
 
-A webcam frame is captured.
+This loop balances **accuracy and performance**.
 
-The CNN performs inference via WebGL.
+---
 
-Expression probabilities are returned.
+## 🏗️ Tech-to-UI Component Mapping
 
-React state updates trigger UI changes.
+| UI Element      | Technology                   | File                             |
+| --------------- | ---------------------------- | -------------------------------- |
+| Digital Brain   | Three.js + @react-three/drei | `src/components/FocusCore.jsx`   |
+| Wobble Effect   | MeshDistortMaterial          | `src/components/FocusCore.jsx`   |
+| Real-Time Graph | Recharts `<AreaChart />`     | `src/pages/Dashboard.jsx`        |
+| Webcam Feed     | react-webcam                 | `src/pages/Dashboard.jsx`        |
+| Face Overlay    | face-api.js                  | `src/pages/Dashboard.jsx`        |
+| UI Cards        | Tailwind + ShadCN            | `src/components/ui/card.tsx`     |
+| Voice Button    | Web Speech API               | `src/pages/Dashboard.jsx`        |
+| Theme Toggle    | Tailwind selector            | `src/components/ThemeToggle.jsx` |
 
-This loop balances accuracy and performance.
+---
 
-🏗️ Full Tech-to-UI Component Mapping
-UI Element	Technology	File Location
-Digital Brain (Neuro-Core)	Three.js + @react-three/drei	src/components/FocusCore.jsx
-Distortion / Wobble Effect	MeshDistortMaterial (Shader)	src/components/FocusCore.jsx
-Real-Time Focus Graph	Recharts <AreaChart />	src/pages/Dashboard.jsx
-Webcam Feed	react-webcam	src/pages/Dashboard.jsx
-Face Detection Overlay	@vladmandic/face-api	src/pages/Dashboard.jsx
-Glassmorphism UI Cards	Tailwind CSS v4 + ShadCN UI	src/components/ui/card.tsx
-Voice Input Button	Web Speech API	src/pages/Dashboard.jsx
-Theme Toggle	Tailwind selector strategy	src/components/ThemeToggle.jsx
-🧩 Sentiment Analysis Design Choice (Text & Voice)
-Primitive Approach (Rejected)
+## 🧩 Sentiment Analysis Design Choice
+
+### ❌ Primitive (Rejected)
+
+```js
 if (text.includes("bad")) score--;
+```
 
+**Problems:**
 
-Problems:
+* No context awareness
+* No negation handling
+* No emotional intensity scaling
 
-No context awareness
+---
 
-No negation handling
+### ✅ NLP-Based (Implemented)
 
-No emotional intensity scaling
+* Lexicon-based sentiment engine
+* Each word has a **weighted emotional value**
+* Supports:
 
-NLP-Based Approach (Implemented)
+  * Negation handling
+  * Emotional intensity
+  * Contextual scoring
 
-Uses a lexicon-based sentiment engine.
+Produces **human-like interpretation**, not keyword matching.
 
-Each word has a weighted emotional value.
+---
 
-Supports:
-
-Negation handling
-
-Emotional intensity
-
-Contextual scoring
-
-This results in human-like interpretation, not keyword matching.
-
-📌 Final Summary
+## 📌 Final Summary
 
 MindSync is not just a productivity tool —
-it is a cognitive companion that understands, visualizes, and reacts to human emotion in real time.
+it is a **cognitive companion** that understands, visualizes, and reacts to human emotion in real time.
 
 It combines:
 
-AI inference
+* AI inference
+* 3D visualization
+* NLP
+* Adaptive UX
 
-3D visualization
+All running **entirely in the browser**, optimized for performance, and designed for real-world usability.
 
-NLP
-
-Adaptive UX
-
-All running entirely in the browser, optimized for performance, and designed for real-world usability.
