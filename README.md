@@ -2,6 +2,8 @@
 🧠 **MindSync**
 **AI-Powered Neuro-Productivity & Cognitive State Tracker**
 
+https://mind-sync-mu.vercel.app/dashboard
+
 MindSync is a next-generation, intelligent productivity dashboard that goes beyond traditional time-tracking tools.
 Instead of only measuring how long you work, MindSync focuses on how you feel while working.
 
