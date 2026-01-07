@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"pnpm run server\" \"vite\"",
+    "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -22,7 +22,7 @@
     "@react-three/fiber": "^9.4.0",
     "@stripe/react-stripe-js": "^5.3.0",
     "@stripe/stripe-js": "^8.2.0",
-    "@supabase/supabase-js": "^2.78.0",
+    "@vladmandic/face-api": "^1.7.15",
     "aceternity-ui": "^0.2.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -38,6 +38,8 @@
     "react-globe.gl": "^2.37.0",
     "react-hook-form": "^7.66.0",
     "react-router-dom": "^7.9.5",
+    "react-webcam": "^7.2.0",
+    "recharts": "^2.15.0",
     "stripe": "^19.2.0",
     "tailwind-merge": "^3.3.1",
     "three": "^0.181.0",
