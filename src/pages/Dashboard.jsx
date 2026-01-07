@@ -4,13 +4,14 @@ import { Button } from "@/components/ui/button";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import Webcam from "react-webcam";
 import * as faceapi from '@vladmandic/face-api';
-import Sentiment from 'sentiment'; // <--- NEW: Real NLP Library
+import Sentiment from 'sentiment'; 
 import { Brain, MessageSquareHeart, Smile, Frown, Meh, Camera, Zap, Trash2, Volume2, VolumeX, Bell } from "lucide-react";
 import { FocusPet } from "@/components/FocusPet";
 
 // --- Configuration ---
 const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
-const LOFI_URL = "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112762.mp3";
+// UPDATED: Using a direct MP3 stream that is more reliable
+const LOFI_URL = "https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3"; 
 
 const initialChartData = [{ time: 'Start', score: 60 }];
 
@@ -22,15 +23,16 @@ export default function Dashboard() {
   // Text Sentiment State
   const [textSentiment, setTextSentiment] = useState("Neutral"); 
   const [userText, setUserText] = useState("");
-  const [sentimentScore, setSentimentScore] = useState(0); // Numerical score
+  const [sentimentScore, setSentimentScore] = useState(0); 
   
   const [suggestion, setSuggestion] = useState("Let's get to work!");
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [isModelLoaded, setIsModelLoaded] = useState(false);
 
   const webcamRef = useRef(null);
+  // Configure Audio to loop
   const audioRef = useRef(new Audio(LOFI_URL));
-  const sentimentAnalyzer = useRef(new Sentiment()); // Initialize Sentiment Analyzer
+  const sentimentAnalyzer = useRef(new Sentiment());
 
   // --- 1. PERSISTENCE ---
   useEffect(() => {
@@ -43,15 +45,12 @@ export default function Dashboard() {
     localStorage.removeItem("mindSyncHistory");
   };
 
-  // --- 2. DYNAMIC SENTIMENT ANALYSIS (Using Library) ---
+  // --- 2. DYNAMIC SENTIMENT ANALYSIS ---
   const handleTextChange = (e) => {
     const txt = e.target.value;
     setUserText(txt);
     
-    // Analyze using the library (No hardcoded lists!)
     const result = sentimentAnalyzer.current.analyze(txt);
-    
-    // Result.score is a number (e.g., +3, -2, 0)
     setSentimentScore(result.score);
 
     if (result.score > 0) setTextSentiment("Positive");
@@ -92,13 +91,23 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, [isModelLoaded]);
 
-  // --- 4. AUDIO LOGIC ---
+  // --- 4. FIXED AUDIO LOGIC ---
   useEffect(() => {
-    if (!audioEnabled) { audioRef.current.pause(); return; }
-    if (focusScore < 40) {
+    // Configure loop
+    audioRef.current.loop = true;
+
+    if (audioEnabled) {
+      // PLAY IMMEDIATELY if enabled
       if (audioRef.current.paused) {
-        audioRef.current.volume = 0.5;
-        audioRef.current.play().catch(e => console.log("Audio block", e));
+        audioRef.current.play().catch(e => console.error("Audio Play Error:", e));
+      }
+
+      // SMART VOLUME: Lower volume if you are super focused (>80)
+      // Otherwise keep it normal (0.5)
+      if (focusScore > 80) {
+        audioRef.current.volume = 0.2; // Background ambience
+      } else {
+        audioRef.current.volume = 0.5; // Help you focus
       }
     } else {
       audioRef.current.pause();
@@ -115,15 +124,14 @@ export default function Dashboard() {
     if (mood === "Stressed") baseScore -= 20;
     if (mood === "Tired") baseScore -= 10;
 
-    // Text Sentiment Impact (Dynamic based on Intensity)
-    // Example: "I am amazing" (Score 4) adds more points than "I am good" (Score 2)
+    // Text Sentiment Impact
     if (sentimentScore > 0) baseScore += Math.min(20, sentimentScore * 5); 
     if (sentimentScore < 0) baseScore += Math.max(-20, sentimentScore * 5);
 
     const finalScore = Math.min(100, Math.max(0, baseScore));
     setFocusScore(prev => Math.round((prev + finalScore) / 2));
 
-    // Dynamic Suggestions
+    // Suggestions
     if (sentimentScore < -2) {
         setSuggestion("You seem deeply stressed. Please take a real break. 🌿");
     } else if (sentimentScore < 0) {
@@ -147,7 +155,7 @@ export default function Dashboard() {
     }, 5000);
 
     return () => clearInterval(updateInterval);
-  }, [mood, sentimentScore]); // Updates when Sentiment Score changes
+  }, [mood, sentimentScore]); 
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-700">
@@ -225,7 +233,6 @@ export default function Dashboard() {
                     </CardContent>
                 </Card>
 
-                {/* NEW: Thought Sentiment Card */}
                 <Card className="border-gray-200 dark:border-zinc-800">
                      <CardContent className="pt-6">
                         <div className="flex justify-between items-start">
