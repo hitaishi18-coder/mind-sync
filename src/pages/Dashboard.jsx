@@ -5,32 +5,33 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import Webcam from "react-webcam";
 import * as faceapi from '@vladmandic/face-api';
 import Sentiment from 'sentiment'; 
-import { Brain, MessageSquareHeart, Smile, Frown, Meh, Camera, Zap, Trash2, Volume2, VolumeX, Bell } from "lucide-react";
-import { FocusPet } from "@/components/FocusPet";
+import { Brain, MessageSquareHeart, Camera, Zap, Trash2, Volume2, VolumeX, Mic, MicOff } from "lucide-react";
+import FocusCore from "@/components/FocusCore";
 
 // --- Configuration ---
 const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
-// UPDATED: Using a direct MP3 stream that is more reliable
 const LOFI_URL = "https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3"; 
 
 const initialChartData = [{ time: 'Start', score: 60 }];
 
 export default function Dashboard() {
+  // --- State ---
   const [chartData, setChartData] = useState(() => JSON.parse(localStorage.getItem("mindSyncHistory")) || initialChartData);
   const [focusScore, setFocusScore] = useState(60);
   const [mood, setMood] = useState("Initializing...");
   
-  // Text Sentiment State
+  // Text & Voice State
   const [textSentiment, setTextSentiment] = useState("Neutral"); 
   const [userText, setUserText] = useState("");
   const [sentimentScore, setSentimentScore] = useState(0); 
+  const [isListening, setIsListening] = useState(false);
   
   const [suggestion, setSuggestion] = useState("Let's get to work!");
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [isModelLoaded, setIsModelLoaded] = useState(false);
 
+  // --- Refs ---
   const webcamRef = useRef(null);
-  // Configure Audio to loop
   const audioRef = useRef(new Audio(LOFI_URL));
   const sentimentAnalyzer = useRef(new Sentiment());
 
@@ -45,17 +46,53 @@ export default function Dashboard() {
     localStorage.removeItem("mindSyncHistory");
   };
 
-  // --- 2. DYNAMIC SENTIMENT ANALYSIS ---
-  const handleTextChange = (e) => {
-    const txt = e.target.value;
-    setUserText(txt);
-    
-    const result = sentimentAnalyzer.current.analyze(txt);
+  // --- 2. SENTIMENT & VOICE LOGIC ---
+  const analyzeSentiment = (text) => {
+    const result = sentimentAnalyzer.current.analyze(text);
     setSentimentScore(result.score);
-
     if (result.score > 0) setTextSentiment("Positive");
     else if (result.score < 0) setTextSentiment("Negative");
     else setTextSentiment("Neutral");
+  };
+
+  const handleTextChange = (e) => {
+    const txt = e.target.value;
+    setUserText(txt);
+    analyzeSentiment(txt);
+  };
+
+  // VOICE RECOGNITION FEATURE
+  const toggleListening = () => {
+    if (!('webkitSpeechRecognition' in window)) {
+      alert("Your browser does not support Voice Recognition. Try Chrome.");
+      return;
+    }
+
+    if (isListening) {
+      setIsListening(false);
+      return;
+    }
+
+    const recognition = new window.webkitSpeechRecognition();
+    recognition.continuous = false;
+    recognition.lang = 'en-US';
+    
+    recognition.onstart = () => {
+      setIsListening(true);
+      setSuggestion("Listening... Speak now 🎙️");
+    };
+
+    recognition.onend = () => setIsListening(false);
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      const newText = userText ? userText + " " + transcript : transcript;
+      setUserText(newText);
+      analyzeSentiment(newText);
+      setSuggestion("Got it! 📝");
+    };
+
+    recognition.start();
   };
 
   // --- 3. REAL AI (Face API) ---
@@ -91,40 +128,27 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, [isModelLoaded]);
 
-  // --- 4. FIXED AUDIO LOGIC ---
+  // --- 4. SMART MUSIC ---
   useEffect(() => {
-    // Configure loop
     audioRef.current.loop = true;
-
     if (audioEnabled) {
-      // PLAY IMMEDIATELY if enabled
-      if (audioRef.current.paused) {
-        audioRef.current.play().catch(e => console.error("Audio Play Error:", e));
-      }
-
-      // SMART VOLUME: Lower volume if you are super focused (>80)
-      // Otherwise keep it normal (0.5)
-      if (focusScore > 80) {
-        audioRef.current.volume = 0.2; // Background ambience
-      } else {
-        audioRef.current.volume = 0.5; // Help you focus
-      }
+      if (audioRef.current.paused) audioRef.current.play().catch(e => console.error(e));
+      // Volume Logic: Lower volume when highly focused
+      audioRef.current.volume = focusScore > 80 ? 0.2 : 0.5;
     } else {
       audioRef.current.pause();
     }
   }, [focusScore, audioEnabled]);
 
-  // --- 5. MAIN SCORING LOGIC ---
+  // --- 5. SCORING LOGIC ---
   useEffect(() => {
     let baseScore = 60;
     
-    // Face Analysis Impact
     if (mood === "Focused") baseScore += 20;
     if (mood === "Happy") baseScore += 10;
     if (mood === "Stressed") baseScore -= 20;
     if (mood === "Tired") baseScore -= 10;
 
-    // Text Sentiment Impact
     if (sentimentScore > 0) baseScore += Math.min(20, sentimentScore * 5); 
     if (sentimentScore < 0) baseScore += Math.max(-20, sentimentScore * 5);
 
@@ -132,17 +156,10 @@ export default function Dashboard() {
     setFocusScore(prev => Math.round((prev + finalScore) / 2));
 
     // Suggestions
-    if (sentimentScore < -2) {
-        setSuggestion("You seem deeply stressed. Please take a real break. 🌿");
-    } else if (sentimentScore < 0) {
-        setSuggestion("A bit negative right now? Try a deep breath. 🌬️");
-    } else if (sentimentScore > 3) {
-        setSuggestion("Incredible energy! You are unstoppable! 🚀");
-    } else if (finalScore > 80) {
-        setSuggestion("Flow state detected. Keep cruising. 🔥");
-    } else {
-        setSuggestion("Steady progress. Stay hydrated 💧");
-    }
+    if (sentimentScore < -2) setSuggestion("You seem stressed. Take a real break. 🌿");
+    else if (sentimentScore > 3) setSuggestion("Incredible energy! Keep going! 🚀");
+    else if (finalScore > 80) setSuggestion("Flow state detected. 🔥");
+    else setSuggestion("Steady progress. Stay hydrated 💧");
 
     const updateInterval = setInterval(() => {
         const now = new Date();
@@ -155,10 +172,10 @@ export default function Dashboard() {
     }, 5000);
 
     return () => clearInterval(updateInterval);
-  }, [mood, sentimentScore]); 
+  }, [mood, sentimentScore]);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-700">
+    <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-700 pb-10">
       
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -166,53 +183,64 @@ export default function Dashboard() {
             <h1 className="text-3xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
                 Good Morning <span className="text-blue-500">Creator</span> 👋
             </h1>
-            <p className="text-gray-500 dark:text-gray-400">Your AI Mind Journal & Tracker</p>
+            <p className="text-gray-500 dark:text-gray-400">AI Mind Journal & Focus Tracker</p>
         </div>
         <Button variant="outline" size="sm" onClick={() => setAudioEnabled(!audioEnabled)} className={audioEnabled ? "text-blue-500 border-blue-200" : "text-gray-400"}>
             {audioEnabled ? <Volume2 className="w-4 h-4 mr-2" /> : <VolumeX className="w-4 h-4 mr-2" />}
-            {audioEnabled ? "Sound On" : "Sound Off"}
+            {audioEnabled ? "Music On" : "Music Off"}
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         
-        {/* LEFT: Camera & Pet */}
+        {/* LEFT COLUMN: VISUALS */}
         <div className="space-y-6">
+            
+            {/* 3D NEURO CORE */}
+            <FocusCore score={focusScore} />
+
+            {/* AI CAMERA */}
             <Card className="overflow-hidden border-blue-100 dark:border-zinc-800 shadow-sm relative">
                 <CardHeader className="pb-2">
-                    <CardTitle className="text-lg flex items-center justify-between">
-                        Face Analysis
-                        <Camera className="w-4 h-4 text-gray-400"/>
+                    <CardTitle className="text-sm flex items-center justify-between text-gray-500">
+                        BIOMETRIC SCAN
+                        <Camera className="w-4 h-4"/>
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="relative rounded-lg overflow-hidden bg-black aspect-video flex items-center justify-center group">
-                        <Webcam ref={webcamRef} audio={false} className="w-full h-full object-cover opacity-90" mirrored={true} />
+                        <Webcam 
+                            ref={webcamRef} 
+                            audio={false} 
+                            // FIXED: Removed 'grayscale' and 'opacity' so it's colorful
+                            className="w-full h-full object-cover" 
+                            mirrored={true} 
+                        />
                         <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-mono flex items-center gap-2">
                            <div className={`w-2 h-2 rounded-full ${isModelLoaded ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'}`}></div>
-                           {isModelLoaded ? "AI ACTIVE" : "LOADING..."}
+                           {isModelLoaded ? "AI ACTIVE" : "INITIALIZING..."}
                         </div>
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-900/50">
-                        <span className="text-sm font-medium text-blue-700 dark:text-blue-300">Emotion:</span>
-                        <div className="flex items-center gap-2 font-bold text-blue-600 dark:text-blue-400">{mood}</div>
+                    <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-500">Detected Mood:</span>
+                        <div className="font-bold text-blue-500">{mood}</div>
                     </div>
                 </CardContent>
             </Card>
 
-            <div className="grid grid-cols-2 gap-4">
-                <FocusPet score={focusScore} />
-                <Card className="border-purple-100 dark:border-zinc-800 shadow-sm flex flex-col justify-center">
-                    <CardContent className="p-4 text-center">
-                        <Zap className="w-6 h-6 text-yellow-500 mx-auto mb-2" />
-                        <p className="text-sm text-purple-900 dark:text-purple-200 font-medium">"{suggestion}"</p>
-                    </CardContent>
-                </Card>
-            </div>
+            {/* SUGGESTION BOX */}
+            <Card className="border-purple-100 dark:border-zinc-800 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/10 dark:to-pink-900/10">
+                <CardContent className="p-4 flex items-center gap-3">
+                    <Zap className="w-5 h-5 text-purple-500" />
+                    <p className="text-sm text-purple-900 dark:text-purple-200 font-medium">"{suggestion}"</p>
+                </CardContent>
+            </Card>
         </div>
 
-        {/* RIGHT: Stats & Journal */}
+        {/* RIGHT COLUMN: DATA & JOURNAL */}
         <div className="md:col-span-2 space-y-6">
+            
+            {/* STATS ROW */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Card className="bg-gradient-to-br from-blue-600 to-blue-700 text-white border-none shadow-lg">
                     <CardContent className="pt-6">
@@ -251,9 +279,10 @@ export default function Dashboard() {
                 </Card>
             </div>
 
+            {/* CHART */}
             <Card className="border-gray-200 dark:border-zinc-800">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle>Session History</CardTitle>
+                    <CardTitle>Session Flow</CardTitle>
                     <Button variant="ghost" size="sm" onClick={clearHistory} className="text-red-500 h-8 text-xs hover:bg-red-50">
                         <Trash2 className="w-3 h-3 mr-1" /> Reset
                     </Button>
@@ -277,18 +306,29 @@ export default function Dashboard() {
                 </CardContent>
             </Card>
 
-            <Card className="border-gray-200 dark:border-zinc-800">
+            {/* JOURNAL INPUT (VOICE ENABLED) */}
+            <Card className="border-gray-200 dark:border-zinc-800 relative">
                 <CardHeader className="pb-2">
                     <CardTitle>Mind Journal</CardTitle>
-                    <CardDescription>Type your thoughts. The AI now understands nuance (e.g., "Not bad").</CardDescription>
+                    <CardDescription>Type your thoughts or use Voice Mode.</CardDescription>
                 </CardHeader>
-                <CardContent className="p-0 px-6 pb-6">
+                <CardContent className="p-0 px-6 pb-6 relative">
                     <textarea 
-                        className="w-full h-24 p-4 rounded-xl bg-gray-50 dark:bg-zinc-900 border-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
-                        placeholder="How are you feeling right now? What are you working on?"
+                        className="w-full h-32 p-4 rounded-xl bg-gray-50 dark:bg-zinc-900 border-none focus:ring-2 focus:ring-blue-500 transition-all resize-none pr-16"
+                        placeholder="How are you feeling? Speak or type..."
                         value={userText}
                         onChange={handleTextChange}
                     ></textarea>
+                    
+                    {/* MIC BUTTON */}
+                    <Button 
+                        size="icon"
+                        variant={isListening ? "destructive" : "secondary"}
+                        onClick={toggleListening}
+                        className={`absolute bottom-8 right-8 rounded-full shadow-lg transition-all ${isListening ? 'animate-pulse scale-110' : ''}`}
+                    >
+                        {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                    </Button>
                 </CardContent>
             </Card>
         </div>
