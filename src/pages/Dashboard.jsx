@@ -4,30 +4,33 @@ import { Button } from "@/components/ui/button";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import Webcam from "react-webcam";
 import * as faceapi from '@vladmandic/face-api';
-import { Brain, Keyboard, Smile, Frown, Meh, Camera, Zap, Trash2, Volume2, VolumeX, Bell } from "lucide-react";
+import Sentiment from 'sentiment'; // <--- NEW: Real NLP Library
+import { Brain, MessageSquareHeart, Smile, Frown, Meh, Camera, Zap, Trash2, Volume2, VolumeX, Bell } from "lucide-react";
 import { FocusPet } from "@/components/FocusPet";
 
 // --- Configuration ---
-const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/'; // Load models from CDN
-const LOFI_URL = "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112762.mp3"; // Free Royalty Free Sample
+const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
+const LOFI_URL = "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112762.mp3";
 
 const initialChartData = [{ time: 'Start', score: 60 }];
 
 export default function Dashboard() {
-  // --- State ---
   const [chartData, setChartData] = useState(() => JSON.parse(localStorage.getItem("mindSyncHistory")) || initialChartData);
   const [focusScore, setFocusScore] = useState(60);
   const [mood, setMood] = useState("Initializing...");
-  const [typingSpeed, setTypingSpeed] = useState(0);
+  
+  // Text Sentiment State
+  const [textSentiment, setTextSentiment] = useState("Neutral"); 
+  const [userText, setUserText] = useState("");
+  const [sentimentScore, setSentimentScore] = useState(0); // Numerical score
+  
   const [suggestion, setSuggestion] = useState("Let's get to work!");
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [isModelLoaded, setIsModelLoaded] = useState(false);
 
-  // --- Refs ---
   const webcamRef = useRef(null);
   const audioRef = useRef(new Audio(LOFI_URL));
-  const lastKeystrokeTime = useRef(Date.now());
-  const typingIdleTimer = useRef(null);
+  const sentimentAnalyzer = useRef(new Sentiment()); // Initialize Sentiment Analyzer
 
   // --- 1. PERSISTENCE ---
   useEffect(() => {
@@ -40,7 +43,23 @@ export default function Dashboard() {
     localStorage.removeItem("mindSyncHistory");
   };
 
-  // --- 2. REAL AI (Face API) ---
+  // --- 2. DYNAMIC SENTIMENT ANALYSIS (Using Library) ---
+  const handleTextChange = (e) => {
+    const txt = e.target.value;
+    setUserText(txt);
+    
+    // Analyze using the library (No hardcoded lists!)
+    const result = sentimentAnalyzer.current.analyze(txt);
+    
+    // Result.score is a number (e.g., +3, -2, 0)
+    setSentimentScore(result.score);
+
+    if (result.score > 0) setTextSentiment("Positive");
+    else if (result.score < 0) setTextSentiment("Negative");
+    else setTextSentiment("Neutral");
+  };
+
+  // --- 3. REAL AI (Face API) ---
   useEffect(() => {
     const loadModels = async () => {
       try {
@@ -50,91 +69,72 @@ export default function Dashboard() {
         setMood("Camera Ready");
       } catch (err) {
         console.error("AI Load Error:", err);
-        setMood("AI Error (Using Sim)");
+        setMood("AI Error (Sim)");
       }
     };
     loadModels();
   }, []);
 
-  // AI Detection Loop
   useEffect(() => {
     if (!isModelLoaded) return;
-    
     const interval = setInterval(async () => {
       if (webcamRef.current && webcamRef.current.video.readyState === 4) {
         const video = webcamRef.current.video;
         const detections = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceExpressions();
-        
         if (detections) {
-          // Get strongest emotion
           const expressions = detections.expressions;
           const maxEmotion = Object.keys(expressions).reduce((a, b) => expressions[a] > expressions[b] ? a : b);
-          
-          // Map to our app's terms
-          const moodMap = { neutral: "Neutral", happy: "Happy", sad: "Stressed", angry: "Stressed", fearful: "Stressed", disgusted: "Tired", surprised: "Focused" };
+          const moodMap = { neutral: "Neutral", happy: "Happy", sad: "Stressed", angry: "Stressed", fearful: "Anxious", disgusted: "Tired", surprised: "Focused" };
           setMood(moodMap[maxEmotion] || "Neutral");
         }
       }
-    }, 2000); // Check every 2 seconds
+    }, 2000);
     return () => clearInterval(interval);
   }, [isModelLoaded]);
 
-
-  // --- 3. AUDIO SOUNDSCAPES ---
+  // --- 4. AUDIO LOGIC ---
   useEffect(() => {
-    if (!audioEnabled) {
-      audioRef.current.pause();
-      return;
-    }
-
-    // High focus (>80) = Silence (Flow state)
-    // Low focus (<40) = Play Lofi (Help focus)
+    if (!audioEnabled) { audioRef.current.pause(); return; }
     if (focusScore < 40) {
       if (audioRef.current.paused) {
         audioRef.current.volume = 0.5;
-        audioRef.current.play().catch(e => console.log("Audio autoplay blocked", e));
+        audioRef.current.play().catch(e => console.log("Audio block", e));
       }
     } else {
-      // Fade out logic could go here, for now just pause
       audioRef.current.pause();
     }
   }, [focusScore, audioEnabled]);
 
-
-  // --- 4. DISTRACTION ZAPPER (Notifications) ---
-  useEffect(() => {
-    // Check permission on mount
-    if (Notification.permission === "default") Notification.requestPermission();
-
-    const checkIdle = setInterval(() => {
-      const timeSinceLastType = Date.now() - lastKeystrokeTime.current;
-      // If idle for more than 5 minutes (300000ms) and focus is low
-      if (timeSinceLastType > 300000 && focusScore < 50) {
-        if (Notification.permission === "granted") {
-           new Notification("MindSync Alert 🛑", { body: "You've been idle for a while. Take a deep breath and refocus!" });
-        }
-      }
-    }, 60000); // Check every minute
-
-    return () => clearInterval(checkIdle);
-  }, [focusScore]);
-
-
-  // --- 5. MAIN LOGIC (Score Calculation) ---
+  // --- 5. MAIN SCORING LOGIC ---
   useEffect(() => {
     let baseScore = 60;
     
-    if (mood === "Focused") baseScore += 25;
-    if (mood === "Happy") baseScore += 15;
-    if (mood === "Neutral") baseScore += 5;
-    if (mood === "Tired") baseScore -= 10;
+    // Face Analysis Impact
+    if (mood === "Focused") baseScore += 20;
+    if (mood === "Happy") baseScore += 10;
     if (mood === "Stressed") baseScore -= 20;
+    if (mood === "Tired") baseScore -= 10;
 
-    if (typingSpeed > 30) baseScore += 15;
-    else if (typingSpeed > 0) baseScore += 5;
+    // Text Sentiment Impact (Dynamic based on Intensity)
+    // Example: "I am amazing" (Score 4) adds more points than "I am good" (Score 2)
+    if (sentimentScore > 0) baseScore += Math.min(20, sentimentScore * 5); 
+    if (sentimentScore < 0) baseScore += Math.max(-20, sentimentScore * 5);
 
     const finalScore = Math.min(100, Math.max(0, baseScore));
     setFocusScore(prev => Math.round((prev + finalScore) / 2));
+
+    // Dynamic Suggestions
+    if (sentimentScore < -2) {
+        setSuggestion("You seem deeply stressed. Please take a real break. 🌿");
+    } else if (sentimentScore < 0) {
+        setSuggestion("A bit negative right now? Try a deep breath. 🌬️");
+    } else if (sentimentScore > 3) {
+        setSuggestion("Incredible energy! You are unstoppable! 🚀");
+    } else if (finalScore > 80) {
+        setSuggestion("Flow state detected. Keep cruising. 🔥");
+    } else {
+        setSuggestion("Steady progress. Stay hydrated 💧");
+    }
 
     const updateInterval = setInterval(() => {
         const now = new Date();
@@ -146,23 +146,8 @@ export default function Dashboard() {
         });
     }, 5000);
 
-    // Dynamic suggestions
-    if (finalScore > 80) setSuggestion("Flow State Achieved! 🚀");
-    else if (finalScore < 40) setSuggestion("Play some Lofi to focus? 🎧");
-    else setSuggestion("Keep steady. Drink water 💧");
-
     return () => clearInterval(updateInterval);
-  }, [mood, typingSpeed]);
-
-  const handleTyping = () => {
-    const now = Date.now();
-    const diff = now - lastKeystrokeTime.current;
-    lastKeystrokeTime.current = now;
-    if (diff < 1000 && diff > 0) {
-        const instantWPM = Math.round(60000 / diff / 5); 
-        setTypingSpeed(prev => Math.round((prev * 0.9) + (instantWPM * 0.1)));
-    }
-  };
+  }, [mood, sentimentScore]); // Updates when Sentiment Score changes
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-700">
@@ -173,24 +158,17 @@ export default function Dashboard() {
             <h1 className="text-3xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
                 Good Morning <span className="text-blue-500">Creator</span> 👋
             </h1>
-            <p className="text-gray-500 dark:text-gray-400">AI-Powered Productivity Tracker</p>
+            <p className="text-gray-500 dark:text-gray-400">Your AI Mind Journal & Tracker</p>
         </div>
-        <div className="flex items-center gap-3">
-             <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setAudioEnabled(!audioEnabled)}
-                className={audioEnabled ? "text-blue-500 border-blue-200" : "text-gray-400"}
-             >
-                {audioEnabled ? <Volume2 className="w-4 h-4 mr-2" /> : <VolumeX className="w-4 h-4 mr-2" />}
-                {audioEnabled ? "Sound On" : "Sound Off"}
-             </Button>
-        </div>
+        <Button variant="outline" size="sm" onClick={() => setAudioEnabled(!audioEnabled)} className={audioEnabled ? "text-blue-500 border-blue-200" : "text-gray-400"}>
+            {audioEnabled ? <Volume2 className="w-4 h-4 mr-2" /> : <VolumeX className="w-4 h-4 mr-2" />}
+            {audioEnabled ? "Sound On" : "Sound Off"}
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         
-        {/* --- LEFT COLUMN --- */}
+        {/* LEFT: Camera & Pet */}
         <div className="space-y-6">
             <Card className="overflow-hidden border-blue-100 dark:border-zinc-800 shadow-sm relative">
                 <CardHeader className="pb-2">
@@ -201,50 +179,31 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="relative rounded-lg overflow-hidden bg-black aspect-video flex items-center justify-center group">
-                        <Webcam 
-                            ref={webcamRef}
-                            audio={false}
-                            className="w-full h-full object-cover opacity-90"
-                            mirrored={true}
-                        />
+                        <Webcam ref={webcamRef} audio={false} className="w-full h-full object-cover opacity-90" mirrored={true} />
                         <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-mono flex items-center gap-2">
                            <div className={`w-2 h-2 rounded-full ${isModelLoaded ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'}`}></div>
-                           {isModelLoaded ? "AI ACTIVE" : "LOADING AI..."}
+                           {isModelLoaded ? "AI ACTIVE" : "LOADING..."}
                         </div>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-900/50">
                         <span className="text-sm font-medium text-blue-700 dark:text-blue-300">Emotion:</span>
-                        <div className="flex items-center gap-2 font-bold text-blue-600 dark:text-blue-400">
-                           {mood}
-                        </div>
+                        <div className="flex items-center gap-2 font-bold text-blue-600 dark:text-blue-400">{mood}</div>
                     </div>
                 </CardContent>
-                
-                {/* Blur Overlay for High Stress */}
-                {mood === "Stressed" && (
-                    <div className="absolute inset-0 bg-white/80 dark:bg-black/80 backdrop-blur-md z-10 flex flex-col items-center justify-center text-center p-6 animate-in fade-in">
-                        <Bell className="w-12 h-12 text-red-500 mb-4 animate-bounce" />
-                        <h3 className="text-2xl font-bold text-red-600">High Stress Detected!</h3>
-                        <p className="text-gray-600 dark:text-gray-300 mt-2">Take a deep breath. The screen will clear when you relax.</p>
-                    </div>
-                )}
             </Card>
 
-            {/* Smart Suggestions & Pet */}
             <div className="grid grid-cols-2 gap-4">
                 <FocusPet score={focusScore} />
                 <Card className="border-purple-100 dark:border-zinc-800 shadow-sm flex flex-col justify-center">
                     <CardContent className="p-4 text-center">
                         <Zap className="w-6 h-6 text-yellow-500 mx-auto mb-2" />
-                        <p className="text-sm text-purple-900 dark:text-purple-200 font-medium">
-                            "{suggestion}"
-                        </p>
+                        <p className="text-sm text-purple-900 dark:text-purple-200 font-medium">"{suggestion}"</p>
                     </CardContent>
                 </Card>
             </div>
         </div>
 
-        {/* --- MIDDLE & RIGHT COLUMNS --- */}
+        {/* RIGHT: Stats & Journal */}
         <div className="md:col-span-2 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Card className="bg-gradient-to-br from-blue-600 to-blue-700 text-white border-none shadow-lg">
@@ -260,25 +219,25 @@ export default function Dashboard() {
                         </div>
                         <div className="mt-6">
                             <div className="w-full bg-blue-900/30 h-2 rounded-full overflow-hidden">
-                                <div 
-                                    className="h-full bg-white/90 rounded-full transition-all duration-1000 ease-out" 
-                                    style={{ width: `${focusScore}%` }}
-                                ></div>
+                                <div className="h-full bg-white/90 rounded-full transition-all duration-1000 ease-out" style={{ width: `${focusScore}%` }}></div>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
+                {/* NEW: Thought Sentiment Card */}
                 <Card className="border-gray-200 dark:border-zinc-800">
                      <CardContent className="pt-6">
                         <div className="flex justify-between items-start">
                             <div>
-                                <p className="text-muted-foreground font-medium mb-1">Typing Velocity</p>
-                                <h2 className="text-5xl font-extrabold tracking-tighter text-gray-800 dark:text-gray-100">{typingSpeed}</h2>
-                                <span className="text-sm text-gray-400">WPM</span>
+                                <p className="text-muted-foreground font-medium mb-1">Journal Vibe</p>
+                                <h2 className={`text-3xl font-extrabold tracking-tighter ${textSentiment === 'Positive' ? 'text-green-500' : textSentiment === 'Negative' ? 'text-red-500' : 'text-gray-500'}`}>
+                                    {textSentiment}
+                                </h2>
+                                <span className="text-sm text-gray-400">Score: {sentimentScore}</span>
                             </div>
-                            <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-xl">
-                                <Keyboard className="w-8 h-8 text-orange-500" />
+                            <div className="p-3 bg-pink-100 dark:bg-pink-900/30 rounded-xl">
+                                <MessageSquareHeart className="w-8 h-8 text-pink-500" />
                             </div>
                         </div>
                     </CardContent>
@@ -312,11 +271,16 @@ export default function Dashboard() {
             </Card>
 
             <Card className="border-gray-200 dark:border-zinc-800">
-                <CardContent className="p-0">
+                <CardHeader className="pb-2">
+                    <CardTitle>Mind Journal</CardTitle>
+                    <CardDescription>Type your thoughts. The AI now understands nuance (e.g., "Not bad").</CardDescription>
+                </CardHeader>
+                <CardContent className="p-0 px-6 pb-6">
                     <textarea 
                         className="w-full h-24 p-4 rounded-xl bg-gray-50 dark:bg-zinc-900 border-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
-                        placeholder="Start typing to track your flow..."
-                        onChange={handleTyping}
+                        placeholder="How are you feeling right now? What are you working on?"
+                        value={userText}
+                        onChange={handleTextChange}
                     ></textarea>
                 </CardContent>
             </Card>
