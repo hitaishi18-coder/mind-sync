@@ -4,6 +4,9 @@
 
 https://mind-sync-mu.vercel.app/dashboard
 
+[![Vercel Deployment](https://image-hosting-link.png)](https://mind-sync-mu.vercel.app)
+
+
 MindSync is a next-generation, intelligent productivity dashboard that goes beyond traditional time-tracking tools.
 Instead of only measuring how long you work, MindSync focuses on how you feel while working.
 
